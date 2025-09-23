@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Click Veloce con Classifica</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      background-color: #f0f0f5;
+      padding: 50px;
+    }
+    h1 { color: #333; }
+    button {
+      padding: 20px 40px;
+      font-size: 24px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      margin-top: 20px;
+    }
+    button:disabled { background-color: #aaa; cursor: not-allowed; }
+    #score, #time { font-size: 20px; margin-top: 20px; }
+    #leaderboard {
+      margin-top: 30px;
+      text-align: left;
+      display: inline-block;
+      background-color: #fff;
+      padding: 15px;
+      border-radius: 10px;
+      box-shadow: 0 0 5px rgba(0,0,0,0.3);
+    }
+    #leaderboard h2 { text-align: center; margin-top: 0; }
+  </style>
+</head>
+<body>
+
+  <h1>Click Veloce con Classifica!</h1>
+  <p>Clicca il bottone il più velocemente possibile in 10 secondi.</p>
+
+  <button id="clickButton" disabled>Cliccami!</button>
+  <div id="score">Punteggio: 0</div>
+  <div id="time">Tempo: 10</div>
+
+  <div id="leaderboard">
+    <h2>Classifica</h2>
+    <ol id="scoresList"></ol>
+  </div>
+
+  <script>
+    let score = 0;
+    let time = 10;
+    let interval;
+
+    const button = document.getElementById('clickButton');
+    const scoreDisplay = document.getElementById('score');
+    const timeDisplay = document.getElementById('time');
+    const scoresList = document.getElementById('scoresList');
+
+    // Carica classifica dal localStorage
+    let leaderboard = JSON.parse(localStorage.getItem('leaderboard')) || [];
+
+    function updateLeaderboard() {
+      leaderboard.sort((a,b) => b - a);
+      leaderboard = leaderboard.slice(0,5); // top 5
+      scoresList.innerHTML = '';
+      leaderboard.forEach(s => {
+        const li = document.createElement('li');
+        li.textContent = s;
+        scoresList.appendChild(li);
+      });
+      localStorage.setItem('leaderboard', JSON.stringify(leaderboard));
+    }
+
+    updateLeaderboard();
+
+    function startGame() {
+      score = 0;
+      time = 10;
+      scoreDisplay.textContent = "Punteggio: " + score;
+      timeDisplay.textContent = "Tempo: " + time;
+      button.disabled = false;
+
+      interval = setInterval(() => {
+        time--;
+        timeDisplay.textContent = "Tempo: " + time;
+        if(time <= 0){
+          clearInterval(interval);
+          button.disabled = true;
+          alert("Tempo finito! Il tuo punteggio: " + score);
+          leaderboard.push(score);
+          updateLeaderboard();
+        }
+      }, 1000);
+    }
+
+    button.addEventListener('click', () => {
+      score++;
+      scoreDisplay.textContent = "Punteggio: " + score;
+    });
+
+    // Avvia il gioco automaticamente dopo 2 secondi
+    setTimeout(startGame, 2000);
+  </script>
+
+</body>
+</html> 
